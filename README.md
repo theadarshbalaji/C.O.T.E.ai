@@ -1,60 +1,74 @@
-# C.O.T.E.ai
-# 🚀 COTE — Classroom-Oriented Training Engine
+# EduPortal - Study Assistant Bot 🎓🤖
 
-![Status](https://img.shields.io/badge/status-active%20development-blue)
-![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20Vite-61dafb)
-![Backend](https://img.shields.io/badge/backend-FastAPI%20%7C%20Node.js-black)
-![License](https://img.shields.io/badge/license-MIT-green)
+EduPortal is a comprehensive AI-powered learning platform designed for both teachers and students. It features an ingestion pipeline for educational PDFs, a RAG-based doubt assistant, and a modern, high-fidelity web interface.
 
-COTE is an **AI-powered classroom learning platform** designed to improve how students learn and how teachers track progress.  
-It combines **structured content delivery, continuous assessment, and AI-driven doubt resolution** into a single system.
+## ✨ Features
 
-> Built with a focus on **learning outcomes, feedback, and improvement** — not just content hosting.
+- **Dual Portals**: Dedicated experiences for Teachers and Students.
+- **AI Material Processing**: Intelligent PDF ingestion and topic mapping.
+- **Interactive Learning**:
+  - **3D Flashcards**: High-performance revision cards with smooth animations.
+  - **Self-Assessments**: Automatically generated quizzes to test knowledge.
+- **Doubt Assistant**: A floating, glassmorphism UI chatbot that leverages RAG (Retrieval-Augmented Generation) to answer doubts from uploaded materials.
+- **Modern UI**: Built with Vite, React, Tailwind CSS 4, and Framer Motion for a premium, responsive experience.
 
----
+## 🏗️ Project Structure
 
-## ✨ Key Features
+```text
+.
+├── frontend/             # Vite + React (TypeScript + Tailwind CSS 4)
+│   ├── src/app/          # Core layout and role selection
+│   ├── src/components/   # Navbar, Sidebar, Chatbot, etc.
+│   └── src/styles/       # Design system and theme configuration
+├── api/                  # FastAPI Backend (Python)
+│   ├── ingestion_pipeline.py  # PDF processing (Ollama/Multi-modal support)
+│   ├── retrieval_service.py   # RAG-based query engine
+│   └── backend_upload_endpoint.py # API endpoints for file uploads
+├── chroma_db/            # Vector database for AI retrieval
+└── uploads/              # Storage for student/teacher materials
+```
 
-### 🔐 Role-Based Authentication
-- Single login flow
-- Two roles:
-  - **Teacher**
-  - **Student**
-- Secure access with protected routes
+## 🚀 Getting Started
 
----
+### Prerequisites
+- Python 3.9+
+- Node.js 20+
+- Ollama (for local AI processing)
 
-### 🧑‍🏫 Teacher Portal
-- Upload PDFs under **topic-wise sections**
-- Organize learning material efficiently
-- Monitor:
-  - Student progress
-  - Topic-wise performance
-  - Assessment results
+### Setting up the Backend
+1. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Windows: .\venv\Scripts\activate
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Start the API:
+   ```bash
+   uvicorn backend_upload_endpoint:app --reload
+   ```
 
----
+### Setting up the Frontend
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-### 🧑‍🎓 Student Portal
-- Access teacher-uploaded study materials
-- Topic-wise learning tools:
-  - 📄 PDFs
-  - 🃏 Flashcards
-  - 📝 Assessments
-  - 🔍 Mistake review & feedback
-- Learn from performance insights, not just scores
+## 🛠️ Tech Stack
 
----
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS 4, Lucide React, Framer Motion.
+- **Backend**: FastAPI, LangChain, ChromaDB, Hugging-Face Embeddings.
+- **AI Models**: GEMINI-2.5-flash, Multi-modal PDF processing using UNSTRUCTURED.
 
-### 🤖 AI Doubt Assistant
-- Floating chat widget (bottom-right)
-- Available on all student pages
-- Helps students:
-  - Ask doubts instantly
-  - Get contextual explanations
-  - Clarify concepts during study
-
----
-
-## 🛣️ Routing Overview
-
-### Public
+## 📄 License
+MIT License
