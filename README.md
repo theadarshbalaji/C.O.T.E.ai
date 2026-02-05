@@ -1,16 +1,22 @@
-# EduPortal - Study Assistant Bot 🎓🤖
+# C.O.T.E.ai 🎓🤖
 
-EduPortal is a comprehensive AI-powered learning platform designed for both teachers and students. It features an ingestion pipeline for educational PDFs, a RAG-based doubt assistant, and a modern, high-fidelity web interface.
+**C.O.T.E.ai** is an AI-powered classroom platform designed to maximize student potential and streamline teacher workflows. It provides a high-fidelity, intelligent environment where educational materials transform into interactive learning experiences.
+
+## 🚀 Vision
+C.O.T.E.ai bridges the gap between traditional teaching and personal AI tutoring, providing teachers with powerful management tools and students with dynamic, adaptive learning materials.
 
 ## ✨ Features
 
-- **Dual Portals**: Dedicated experiences for Teachers and Students.
-- **AI Material Processing**: Intelligent PDF ingestion and topic mapping.
-- **Interactive Learning**:
-  - **3D Flashcards**: High-performance revision cards with smooth animations.
-  - **Self-Assessments**: Automatically generated quizzes to test knowledge.
-- **Doubt Assistant**: A floating, glassmorphism UI chatbot that leverages RAG (Retrieval-Augmented Generation) to answer doubts from uploaded materials.
-- **Modern UI**: Built with Vite, React, Tailwind CSS 4, and Framer Motion for a premium, responsive experience.
+### 👨‍🏫 Teacher Portal
+- **Material Management**: Seamlessly upload and organize educational PDFs for your classes.
+- **Performance Overview**: Track student progress and performance metrics at a glance.
+- **Classroom Insights**: View and manage the list of students present in your virtual classroom.
+
+### 🎓 Student Portal
+- **Live Document Summaries**: Instant access to key takeaways from uploaded materials.
+- **Summarized Flashcards**: Personalized cards generated for "last-second revision" and efficient active recall.
+- **Dynamic Adaptive Tests**: Quizzes that evolve to increase the student's level to their maximum potential.
+- **C.O.T.E.ai Doubt Assistant**: A premium, glassmorphism-styled floating chatbot for instant doubt clarification using RAG.
 
 ## 🏗️ Project Structure
 
@@ -21,11 +27,11 @@ EduPortal is a comprehensive AI-powered learning platform designed for both teac
 │   ├── src/components/   # Navbar, Sidebar, Chatbot, etc.
 │   └── src/styles/       # Design system and theme configuration
 ├── api/                  # FastAPI Backend (Python)
-│   ├── ingestion_pipeline.py  # PDF processing (Ollama/Multi-modal support)
-│   ├── retrieval_service.py   # RAG-based query engine
-│   └── backend_upload_endpoint.py # API endpoints for file uploads
-├── chroma_db/            # Vector database for AI retrieval
-└── uploads/              # Storage for student/teacher materials
+│   ├── ingestion_pipeline.py  # Advanced PDF processing and ingestion
+│   ├── retrieval_service.py   # RAG-based query engine using Gemini 2.0 Flash
+│   └── backend_upload_endpoint.py # API endpoints for file and session management
+├── chroma_db/            # Vector database for high-speed retrieval
+└── uploads/              # Storage for classroom materials
 ```
 
 ## 🚀 Getting Started
@@ -33,7 +39,7 @@ EduPortal is a comprehensive AI-powered learning platform designed for both teac
 ### Prerequisites
 - Python 3.9+
 - Node.js 20+
-- Ollama (for local AI processing)
+- Google Gemini API Key
 
 ### Setting up the Backend
 1. Create a virtual environment:
@@ -45,7 +51,11 @@ EduPortal is a comprehensive AI-powered learning platform designed for both teac
    ```bash
    pip install -r requirements.txt
    ```
-3. Start the API:
+3. Set up your `.env` file:
+   ```text
+   GOOGLE_API_KEY=your_gemini_api_key_here
+   ```
+4. Start the API:
    ```bash
    uvicorn backend_upload_endpoint:app --reload
    ```
@@ -67,8 +77,8 @@ EduPortal is a comprehensive AI-powered learning platform designed for both teac
 ## 🛠️ Tech Stack
 
 - **Frontend**: React, TypeScript, Vite, Tailwind CSS 4, Lucide React, Framer Motion.
-- **Backend**: FastAPI, LangChain, ChromaDB, Hugging-Face Embeddings.
-- **AI Models**: GEMINI-2.5-flash, Multi-modal PDF processing using UNSTRUCTURED.
+- **Backend**: FastAPI, LangChain, ChromaDB, Hugging-face embeddings.
+- **AI Engine**: **Google Gemini 2.0 Flash** (Model of choice for speed and reasoning).
 
 ## 📄 License
 MIT License
