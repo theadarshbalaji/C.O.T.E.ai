@@ -1,0 +1,21 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+chroma_db/
+uploads/
+.pytest_cache/
+
+# --- Node/Frontend ---
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+
+# --- IDE/OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
