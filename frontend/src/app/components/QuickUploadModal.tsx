@@ -7,7 +7,7 @@ interface QuickUploadModalProps {
     isOpen: boolean;
     onClose: () => void;
     topics: Topic[];
-    onUploadComplete: (topicId: string, pdfUrl: string) => void;
+    onUploadComplete: (topicId: string, fileName: string) => void;
 }
 
 export const QuickUploadModal: React.FC<QuickUploadModalProps> = ({
@@ -130,8 +130,8 @@ export const QuickUploadModal: React.FC<QuickUploadModalProps> = ({
                     <div
                         onClick={() => fileInputRef.current?.click()}
                         className={`relative border-2 border-dashed rounded-[2rem] p-8 text-center cursor-pointer transition-all ${selectedFile
-                                ? 'border-primary bg-primary/5'
-                                : 'border-border hover:border-primary hover:bg-primary/5'
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary hover:bg-primary/5'
                             }`}
                     >
                         <input

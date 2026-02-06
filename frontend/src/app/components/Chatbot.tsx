@@ -6,8 +6,38 @@ import {
     Bot,
     User
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import mermaid from 'mermaid';
 
-export const Chatbot: React.FC = () => {
+mermaid.initialize({
+    startOnLoad: false,
+    theme: 'dark',
+    securityLevel: 'loose',
+});
+
+const Mermaid = ({ chart }: { chart: string }) => {
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (ref.current) {
+            mermaid.render(`mermaid-${Math.random().toString(36).substr(2, 9)}`, chart).then((result) => {
+                if (ref.current) ref.current.innerHTML = result.svg;
+            }).catch((err) => {
+                console.error("Mermaid failed to render", err);
+                if (ref.current) ref.current.innerHTML = `<p class="text-red-500 text-xs">Failed to render chart</p>`;
+            });
+        }
+    }, [chart]);
+
+    return <div ref={ref} className="my-4 flex justify-center bg-white/5 p-4 rounded-lg overflow-x-auto" />;
+};
+
+interface ChatbotProps {
+    sessionId?: string | null;
+}
+
+export const Chatbot: React.FC<ChatbotProps> = ({ sessionId }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [language, setLanguage] = useState<'english' | 'hindi' | 'telugu' | null>(null);
     const [messages, setMessages] = useState([
@@ -41,8 +71,13 @@ export const Chatbot: React.FC = () => {
         setInput('');
         setIsTyping(true);
 
+        const activeSession = sessionId || 'default';
+        console.log("🤖 Chatbot Request:", { activeSession, sessionId, input, language });
+
         try {
-            const response = await fetch(`http://localhost:8000/ask?session_id=default&query=${encodeURIComponent(input)}&language=${language}`, {
+            const url = `http://localhost:8000/ask?session_id=${activeSession}&query=${encodeURIComponent(input)}&language=${language}`;
+            console.log("🔗 Fetching URL:", url);
+            const response = await fetch(url, {
                 method: 'POST',
             });
 
@@ -108,8 +143,48 @@ export const Chatbot: React.FC = () => {
                             <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center ${msg.role === 'assistant' ? 'bg-primary text-primary-foreground' : 'bg-secondary border border-border'}`}>
                                 {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
                             </div>
-                            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'assistant' ? 'bg-white/10 border border-white/10 rounded-tl-none font-medium' : 'bg-primary text-primary-foreground rounded-tr-none font-semibold'}`}>
-                                {msg.content}
+                            <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'assistant' ? 'bg-white/10 border border-white/10 rounded-tl-none font-medium' : 'bg-primary text-primary-foreground rounded-tr-none font-semibold'}`}>
+                                {msg.role === 'assistant' ? (
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            code({ node, inline, className, children, ...props }: any) {
+                                                const match = /language-(\w+)/.exec(className || '');
+                                                const isMermaid = match && match[1] === 'mermaid';
+
+                                                if (!inline && isMermaid) {
+                                                    return <Mermaid chart={String(children).replace(/\n$/, '')} />;
+                                                }
+
+                                                return !inline && match ? (
+                                                    <div className="my-2 rounded-lg overflow-hidden bg-black/30 border border-white/10">
+                                                        <div className="bg-white/5 px-3 py-1 text-[10px] font-bold text-muted-foreground uppercase">{match[1]}</div>
+                                                        <code className={`${className} block p-3 overflow-x-auto`} {...props}>
+                                                            {children}
+                                                        </code>
+                                                    </div>
+                                                ) : (
+                                                    <code className={`${className} bg-black/20 px-1 py-0.5 rounded font-mono text-[11px]`} {...props}>
+                                                        {children}
+                                                    </code>
+                                                );
+                                            },
+                                            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                                            ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
+                                            ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
+                                            li: ({ children }) => <li className="pl-1">{children}</li>,
+                                            a: ({ children, href }) => <a href={href} className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">{children}</a>,
+                                            strong: ({ children }) => <strong className="font-bold text-white/90">{children}</strong>,
+                                            h1: ({ children }) => <h1 className="text-lg font-bold my-2">{children}</h1>,
+                                            h2: ({ children }) => <h2 className="text-base font-bold my-2">{children}</h2>,
+                                            h3: ({ children }) => <h3 className="text-sm font-bold my-1">{children}</h3>,
+                                        }}
+                                    >
+                                        {msg.content}
+                                    </ReactMarkdown>
+                                ) : (
+                                    msg.content
+                                )}
                             </div>
                         </div>
                     ))}

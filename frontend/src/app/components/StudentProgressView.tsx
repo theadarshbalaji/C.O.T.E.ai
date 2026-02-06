@@ -5,15 +5,28 @@ import {
     ArrowLeft,
     GraduationCap,
     Clock,
-    Filter
+    Filter,
+    TrendingUp,
+    AlertCircle,
+    PlayCircle,
+    ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Topic } from '../App';
+import { ActivityGraph } from './ActivityGraph';
+import { useActivityTracker } from '../hooks/useActivityTracker';
 
 interface StudentProgressViewProps {
     onCreateClass: (name: string, batch?: string, grade?: string) => string;
     topics: Topic[];
+    userRole: 'teacher' | 'student';
 }
+
+const MOCK_MISTAKES = [
+    { id: 1, question: "What is the time complexity of QuickSort?", topic: "Algorithms", correct: "O(n log n)", wrong: "O(n)" },
+    { id: 2, question: "Define 'Polymorphism' in OOP.", topic: "Object Oriented Programming", correct: "Ability of an object to take many forms", wrong: "Inheriting properties from parent" },
+    { id: 3, question: "What is the capital of France?", topic: "General Knowledge", correct: "Paris", wrong: "London" }, // Just a filler example
+];
 
 const MOCK_STUDENTS = [
     { id: '1', name: 'Alex Johnson', progress: 85, lastActive: '2 mins ago', status: 'Active', hours: 12.5 },
@@ -23,7 +36,8 @@ const MOCK_STUDENTS = [
     { id: '5', name: 'David Miller', progress: 100, lastActive: 'Yesterday', status: 'Completed', hours: 22.1 },
 ];
 
-export const StudentProgressView: React.FC<StudentProgressViewProps> = ({ onCreateClass, topics }) => {
+export const StudentProgressView: React.FC<StudentProgressViewProps> = ({ onCreateClass, topics, userRole }) => {
+    const { weeklyLogs } = useActivityTracker();
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
     const [isCreatingClass, setIsCreatingClass] = useState(false);
     const [createdCode, setCreatedCode] = useState<string | null>(null);
@@ -32,6 +46,86 @@ export const StudentProgressView: React.FC<StudentProgressViewProps> = ({ onCrea
         batchYear: '',
         grade: ''
     });
+
+    // --- STUDENT VIEW ---
+    if (userRole === 'student') {
+        const currentXP = 1250;
+        const lastWeekXP = 980;
+        const xpIncrease = Math.round(((currentXP - lastWeekXP) / lastWeekXP) * 100);
+
+        return (
+            <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <header>
+                    <h2 className="text-3xl font-black">Your Learning Journey</h2>
+                    <p className="text-muted-foreground">Track your stats, XP, and review areas for improvement.</p>
+                </header>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* LEFT COLUMN: ACTIVITY & XP */}
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* Activity Graph */}
+                        <ActivityGraph logs={weeklyLogs} />
+
+                        {/* XP Stats */}
+                        <div className="p-6 bg-card border border-border rounded-3xl shadow-xl shadow-primary/5 space-y-6">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xl font-bold flex items-center gap-2">
+                                    <TrendingUp className="text-primary" /> XP Improvement
+                                </h3>
+                                <div className="px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-1">
+                                    <TrendingUp size={14} /> +{xpIncrease}% this week
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 bg-secondary/50 rounded-2xl space-y-1">
+                                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">Last Week</p>
+                                    <p className="text-3xl font-black text-muted-foreground">{lastWeekXP} XP</p>
+                                </div>
+                                <div className="p-4 bg-primary/10 border border-primary/20 rounded-2xl space-y-1 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                                        <GraduationCap size={48} />
+                                    </div>
+                                    <p className="text-xs font-black text-primary uppercase tracking-widest">This Week</p>
+                                    <p className="text-3xl font-black text-primary">{currentXP} XP</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* RIGHT COLUMN: REVIEW MISTAKES */}
+                    <div className="space-y-6">
+                        <div className="p-6 bg-card border border-border rounded-3xl shadow-xl shadow-primary/5 h-full">
+                            <h3 className="text-xl font-bold flex items-center gap-2 mb-6">
+                                <AlertCircle className="text-orange-500" /> Review Mistakes
+                            </h3>
+
+                            <div className="space-y-4">
+                                {MOCK_MISTAKES.map(mistake => (
+                                    <div key={mistake.id} className="p-4 bg-secondary/30 border border-border rounded-2xl space-y-3 hover:border-primary/50 transition-colors group">
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{mistake.topic}</span>
+                                            <p className="font-bold text-sm leading-tight">{mistake.question}</p>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-xs">
+                                            <span className="text-red-500 font-bold line-through opacity-70">{mistake.wrong}</span>
+                                            <ArrowRight size={12} className="text-muted-foreground" />
+                                            <span className="text-green-500 font-bold">{mistake.correct}</span>
+                                        </div>
+
+                                        <button className="w-full py-2 bg-primary/10 text-primary rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all flex items-center justify-center gap-2">
+                                            <PlayCircle size={14} /> Review Concept
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     const handleCreateClass = (e: React.FormEvent) => {
         e.preventDefault();
@@ -231,8 +325,8 @@ export const StudentProgressView: React.FC<StudentProgressViewProps> = ({ onCrea
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${student.status === 'Active' ? 'bg-green-500/10 text-green-500' :
-                                                student.status === 'Completed' ? 'bg-primary/10 text-primary' :
-                                                    'bg-muted text-muted-foreground'
+                                            student.status === 'Completed' ? 'bg-primary/10 text-primary' :
+                                                'bg-muted text-muted-foreground'
                                             }`}>
                                             {student.status}
                                         </span>

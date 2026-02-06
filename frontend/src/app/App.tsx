@@ -11,11 +11,21 @@ import { ThemeProvider } from 'next-themes';
 
 import { useEffect } from 'react';
 
+export interface Material {
+    id: string;
+    title: string;
+    url: string;
+    type: 'pdf';
+    date: string;
+    description?: string; // For post content
+}
+
 export interface Topic {
     id: string;
     title: string;
     description: string;
-    pdfUrl: string;
+    materials: Material[];
+    pdfUrl?: string; // Keeping optional for backwards compatibility during migration
     flashcards: { id: string; question: string; answer: string }[];
     questions: { id: string; question: string; options: string[]; correctAnswer: number }[];
     enrolledStudentIds?: string[];
@@ -30,7 +40,34 @@ export default function App() {
     const [userRole, setUserRole] = useState<'teacher' | 'student' | null>(null);
     const [topics, setTopics] = useState<Record<string, Topic>>(() => {
         const saved = localStorage.getItem('cote_topics');
-        return saved ? JSON.parse(saved) : {};
+        if (!saved) return {};
+
+        try {
+            const parsed = JSON.parse(saved);
+            // Migration Logic: Convert legacy pdfUrl to materials array
+            Object.keys(parsed).forEach(key => {
+                const topic = parsed[key];
+                if (!topic.materials) topic.materials = [];
+
+                // If there's a legacy PDF and no materials yet, migrate it
+                if (topic.pdfUrl && topic.materials.length === 0) {
+                    topic.materials.push({
+                        id: Math.random().toString(36).substring(2, 9),
+                        title: 'Course Material (Legacy)',
+                        url: topic.pdfUrl,
+                        type: 'pdf',
+                        date: new Date().toISOString(),
+                        description: 'Materials uploaded previously.'
+                    });
+                    // distinct delete to avoid TS issues if strictly typed, but here it's any at runtime
+                    delete topic.pdfUrl;
+                }
+            });
+            return parsed;
+        } catch (e) {
+            console.error("Failed to migrate data", e);
+            return {};
+        }
     });
 
     useEffect(() => {
@@ -52,7 +89,7 @@ export default function App() {
             id,
             title: name,
             description: `${grade} - ${batch}`,
-            pdfUrl: '',
+            materials: [],
             flashcards: [],
             questions: [],
             enrollmentCode: code,
@@ -72,10 +109,23 @@ export default function App() {
         return false;
     };
 
-    const handleUploadComplete = (topicId: string, pdfUrl: string) => {
+    const handleUploadComplete = (topicId: string, fileName: string) => {
+        const pdfUrl = `http://localhost:8000/uploads/${topicId}/${fileName}`;
+        const newMaterial: Material = {
+            id: Math.random().toString(36).substring(2, 9),
+            title: fileName,
+            url: pdfUrl,
+            type: 'pdf',
+            date: new Date().toISOString(),
+            description: 'Posted a new material'
+        };
+
         setTopics(prev => ({
             ...prev,
-            [topicId]: { ...prev[topicId], pdfUrl }
+            [topicId]: {
+                ...prev[topicId],
+                materials: [newMaterial, ...(prev[topicId].materials || [])] // Prepend to show newest first
+            }
         }));
     };
 
@@ -121,7 +171,7 @@ export default function App() {
                         title={navbarTitle}
                     />
 
-                    <main className="min-h-[calc(100vh-64px)]">
+                    <main className={`${selectedTopic ? 'h-[calc(100vh-64px)] overflow-hidden flex flex-col' : 'min-h-[calc(100vh-64px)]'}`}>
                         {selectedTopic ? (
                             <MaterialView
                                 topic={selectedTopic}
@@ -129,10 +179,11 @@ export default function App() {
                                 userRole={userRole}
                                 onUploadComplete={handleUploadComplete}
                             />
-                        ) : activeTab === 'progress' && userRole === 'teacher' ? (
+                        ) : activeTab === 'progress' ? (
                             <StudentProgressView
                                 onCreateClass={handleCreateClassroom}
                                 topics={Object.values(topics)}
+                                userRole={userRole}
                             />
                         ) : (
                             <Dashboard
@@ -147,7 +198,7 @@ export default function App() {
                     </main>
                 </div>
 
-                <Chatbot />
+                <Chatbot sessionId={selectedTopicId} />
                 <Toaster position="top-right" />
             </div>
         </ThemeProvider>

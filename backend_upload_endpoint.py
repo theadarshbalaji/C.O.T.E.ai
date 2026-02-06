@@ -3,13 +3,14 @@ from typing import List
 import os
 import shutil
 import uuid
+import json # Added json import as it's used later in the code
 
 from ingestion_pipeline import ingest_directory
 from retrieval_service import get_doubt_assistant_response
-from unstructured.partition.pdf import partition_pdf
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel # Added pydantic BaseModel as it's in the provided snippet
 
 app = FastAPI()
 
@@ -63,6 +64,7 @@ async def health_check():
 
 @app.post("/ask")
 async def ask_question(session_id: str, query: str, language: str = "english"):
+    print(f"📥 /ask Request - Session: {session_id}, Query: {query}, Lang: {language}")
     """
     Endpoint for the Student Portal Doubt Assistant.
     """
@@ -161,6 +163,7 @@ async def save_teacher_review(data: dict):
 
 @app.post("/upload_review")
 async def upload_review(
+    background_tasks: BackgroundTasks,
     session_id: str = Form(...),
     assessment_focus: str = Form(""),
     student_gaps: str = Form(""),
@@ -168,6 +171,7 @@ async def upload_review(
 ):
     """
     Endpoint for teachers to send feedback including documents.
+    Triggers RAG ingestion in the background.
     """
     session_dir = os.path.join(UPLOAD_ROOT, session_id)
     os.makedirs(session_dir, exist_ok=True)
@@ -185,20 +189,19 @@ async def upload_review(
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
             
-            # Extract text from the review document
-            elements = partition_pdf(filename=file_path)
-            doc_text = "\n".join([el.text for el in elements if hasattr(el, 'text')])
-            
             review_data["has_document"] = True
             review_data["document_path"] = file_path
-            review_data["document_text"] = doc_text
+            
+            # Trigger ingestion for RAG
+            background_tasks.add_task(ingest_directory, session_dir)
+            
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to save or process review document: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to save review document: {str(e)}")
 
     review_path = os.path.join(session_dir, "teacher_review.json")
     try:
         with open(review_path, "w") as f:
             json.dump(review_data, f, indent=4)
-        return {"status": "success", "message": "Teacher review and document saved"}
+        return {"status": "success", "message": "Teacher review saved and processing started"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

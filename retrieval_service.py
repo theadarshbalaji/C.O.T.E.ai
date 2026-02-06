@@ -66,7 +66,8 @@ def get_doubt_assistant_response(query: str, session_id: str, language: str = "e
         collection_name="hackathon_collection"
     )
 
-    # 2. Retrieve relevant chunks (filtered by session_id)
+    # 3. Retrieve context from Vector DB
+    print(f"🔍 Searching ChromaDB for session: {session_id} with query: {query}")
     results = db.max_marginal_relevance_search(
         query, 
         k=8, 
@@ -74,9 +75,21 @@ def get_doubt_assistant_response(query: str, session_id: str, language: str = "e
         lambda_mult=0.5, 
         filter={"session_id": session_id}
     )
+    print(f"📊 Found {len(results)} chunks in ChromaDB")
     
     if not results:
-        return "I'm sorry, I couldn't find any information related to that in your uploaded documents. Could you try rephrasing or asking about a different topic?"
+        # Fallback to general search if no session-specific data
+        print("⚠️ No session-specific results found. Checking without filter...")
+        results = db.max_marginal_relevance_search(
+            query,
+            k=5,
+            fetch_k=10,
+            lambda_mult=0.5
+        )
+        print(f"📊 Found {len(results)} chunks in Global fallback")
+        
+        if not results:
+            return "I'm sorry, I couldn't find any information related to that in your uploaded documents. Could you try rephrasing or asking about a different topic?"
 
     # 3. Format Context
     context_text = ""
