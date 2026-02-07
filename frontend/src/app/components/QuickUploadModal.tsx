@@ -42,12 +42,11 @@ export const QuickUploadModal: React.FC<QuickUploadModalProps> = ({
 
         setIsUploading(true);
         const formData = new FormData();
-        formData.append('files', selectedFile);
-        formData.append('session_id', selectedTopicId);
+        formData.append('file', selectedFile);
 
         try {
             toast.loading('Processing document...', { id: 'quick-upload' });
-            const response = await fetch(`http://localhost:8000/upload`, {
+            const response = await fetch(`http://localhost:8000/upload?session_id=${selectedTopicId}`, {
                 method: 'POST',
                 body: formData,
             });

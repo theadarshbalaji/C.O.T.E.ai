@@ -11,7 +11,6 @@ C.O.T.E.ai bridges the gap between traditional teaching and personal AI tutoring
 - **Material Management**: Seamlessly upload and organize educational PDFs for your classes.
 - **Performance Overview**: Track student progress and performance metrics at a glance.
 - **Classroom Insights**: View and manage the list of students present in your virtual classroom.
-- -**Subject Insights**: Teacher gets live updates from the assessments for understanding the misconceptions and concepts the students are lacking in.
 
 ### 🎓 Student Portal
 - **Live Document Summaries**: Instant access to key takeaways from uploaded materials.
@@ -40,7 +39,7 @@ C.O.T.E.ai bridges the gap between traditional teaching and personal AI tutoring
 ├── api/                  # FastAPI Backend (Python)
 │   ├── ingestion_pipeline.py  # Advanced PDF processing and ingestion
 │   ├── retrieval_service.py   # RAG-based query engine using Gemini 2.0 Flash
-│   └── main.py # API endpoints for file and session management
+│   └── backend_upload_endpoint.py # API endpoints for file and session management
 ├── chroma_db/            # Vector database for high-speed retrieval
 └── uploads/              # Storage for classroom materials
 ```
@@ -68,7 +67,7 @@ C.O.T.E.ai bridges the gap between traditional teaching and personal AI tutoring
    ```
 4. Start the API:
    ```bash
-   uvicorn main:app --reload
+   uvicorn backend_upload_endpoint:app --reload
    ```
 
 ### Setting up the Frontend
@@ -92,4 +91,5 @@ C.O.T.E.ai bridges the gap between traditional teaching and personal AI tutoring
 - **AI Engine**: **Google Gemini 2.0 Flash** (Model of choice for speed and reasoning).
 
 ## 📄 License
+MIT License
 MIT License
