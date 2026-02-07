@@ -2,8 +2,12 @@
 
 **C.O.T.E.ai** stands for Classroom of the Elite. It is an AI-powered classroom platform designed to maximize student potential and streamline teacher workflows. It provides a high-fidelity, intelligent environment where educational materials transform into interactive learning experiences.
 
+
 ## 🚀 Vision
 C.O.T.E.ai bridges the gap between traditional teaching and personal AI tutoring, providing teachers with powerful management tools and students with dynamic, adaptive learning materials.
+
+### Working demonstration of the application:
+-https://drive.google.com/drive/folders/1OztcflZcjAxdiGdIXdnaCSp2AGUkW6iZ
 
 ## ✨ Features
 
@@ -31,8 +35,6 @@ the language that they want to read it in for having inclusivity for diverse lin
 - **C.O.T.E.ai Doubt Assistant**: A premium, glassmorphism-styled floating chatbot for instant doubt clarification using RAG. Tuned to the needs of the children
 focuses on giving the formal definition from the context along with analogies, analogies, and brain teasers for better building of intution among the students. Sole motive is to be able to erradicate the culture of rote learning
 
-### Working demonstration of the application:
--https://drive.google.com/drive/folders/1OztcflZcjAxdiGdIXdnaCSp2AGUkW6iZ
 
 ## 🏗️ Project Structure
 
