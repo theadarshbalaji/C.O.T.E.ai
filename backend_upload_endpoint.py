@@ -10,7 +10,9 @@ from retrieval_service import get_doubt_assistant_response
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel # Added pydantic BaseModel as it's in the provided snippet
+from pydantic import BaseModel
+import assessment_service
+import flashcard_service
 
 app = FastAPI()
 
@@ -211,6 +213,43 @@ async def get_progress_endpoint(session_id: str):
     """Get current XP and unlocked levels for a student in a specific classroom."""
     from assessment_service import get_progress
     return get_progress(session_id)
+
+@app.get("/api/flashcards/{session_id}")
+async def get_flashcards(session_id: str):
+    """Get topic-wise revision flashcards."""
+    try:
+        cards = flashcard_service.generate_flashcards(session_id)
+        return cards
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class XPRequest(BaseModel):
+    session_id: str
+    amount: int
+
+@app.post("/api/add_xp")
+async def add_xp(request: XPRequest):
+    """Manually add XP to a student (e.g. for viewing flashcards)."""
+    try:
+        progress = assessment_service.load_user_progress()
+        if request.session_id not in progress:
+            # Initialize if not exists
+            progress[request.session_id] = {
+                "xp": 0,
+                "mistakes": [],
+                "history": [],
+                "unlocked_level": 1
+            }
+        
+        progress[request.session_id]["xp"] += request.amount
+        assessment_service.save_user_progress(progress)
+        
+        return {
+            "success": True,
+            "new_total": progress[request.session_id]["xp"]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ----------------------------
 # TEACHER REVIEW ENDPOINT

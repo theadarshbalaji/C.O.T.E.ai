@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Navbar } from './components/Navbar';
 import { Dashboard } from './components/Dashboard';
-import { MaterialView } from './components/MaterialView';
+import { MaterialsHub } from './components/MaterialsHub';
 import { Chatbot } from './components/Chatbot';
 import { StudentProgressView } from './components/StudentProgressView';
 import { AssessmentPathView } from './components/AssessmentPathView';
@@ -174,7 +174,7 @@ export default function App() {
 
                     <main className={`${selectedTopic ? 'h-[calc(100vh-64px)] overflow-hidden flex flex-col' : 'min-h-[calc(100vh-64px)]'}`}>
                         {selectedTopic ? (
-                            <MaterialView
+                            <MaterialsHub
                                 topic={selectedTopic}
                                 onBack={handleBackToDashboard}
                                 userRole={userRole}
