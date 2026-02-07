@@ -215,10 +215,10 @@ async def get_progress_endpoint(session_id: str):
     return get_progress(session_id)
 
 @app.get("/api/flashcards/{session_id}")
-async def get_flashcards(session_id: str):
-    """Get topic-wise revision flashcards."""
+async def get_flashcards(session_id: str, language: str = "english"):
+    """Get topic-wise revision flashcards with language support."""
     try:
-        cards = flashcard_service.generate_flashcards(session_id)
+        cards = flashcard_service.generate_flashcards(session_id, language)
         return cards
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

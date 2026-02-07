@@ -37,22 +37,28 @@ FLASHCARD_SYSTEM_PROMPT = """
 You are an expert educational content creator. Your goal is to extract the main topics from a provided text and create concise, high-impact revision summaries for each topic.
 
 Rules for your response:
-1. **Extraction**: Identify the 5-8 most important core topics or concepts from the provided text.
-2. **Conciseness**: Each summary MUST be short and punchy (max 100 words per topic).
+1. **Comprehensive Extraction**: Identify **all distinct core topics, sections, or concepts** discussed in the provided text. Do not limit yourself to a fixed number; if the text covers 10 concepts, list all 10.
+2. **Conciseness**: Each summary MUST be short and power-packed (max 120 words per topic).
 3. **Format**: Return a JSON object with a list called "flashcards". Each item should have:
-   - "topic": The name of the concept.
+   - "topic": The name of the concept or section heading (In English).
    - "summary": The concise revision notes for that topic.
 4. **Style**: Use bullet points and bold text for key terms within the summary.
 5. **JSON ONLY**: Your entire response MUST be a valid JSON object. Do not include any markdown formatting like ```json ... ``` tags.
+6. **Language Rule**: The summary must be written in the **Target Language** specified in the user prompt. 
+   - If the target language is **Hindi** or **Telugu**, you MUST use the **Native Scripture** (Devanagari for Hindi, Telugu script for Telugu). 
+   - DO NOT use Romanized text (Hinglish/Tenglish) if Hindi or Telugu is selected.
+   - If the target language is **English**, the entire summary must be in **English**.
+   - Technical terms (e.g., "Transformer", "Neural Network") should always remain in English regardless of the target language.
 """
 
-def generate_flashcards(session_id: str):
+def generate_flashcards(session_id: str, language: str = "english"):
     """
     Generates topic-wise revision summaries from the ingested materials of a session.
     """
-    flashcard_cache_path = os.path.join("uploads", session_id, "flashcards.json")
+    cache_name = f"flashcards_v4_{language.lower()}.json"
+    flashcard_cache_path = os.path.join("uploads", session_id, cache_name)
     
-    # Check if already generated
+    # Check if already generated for this language
     if os.path.exists(flashcard_cache_path):
         try:
             with open(flashcard_cache_path, "r") as f:
@@ -68,8 +74,7 @@ def generate_flashcards(session_id: str):
     )
 
     # 2. Retrieve all unique chunks for this session
-    print(f"🔍 Retrieving material for flashcards in session: {session_id}")
-    # We retrieve more chunks to get a broader overview for topic extraction
+    print(f"🔍 Retrieving material for {language} flashcards in session: {session_id}")
     results = db.get(
         where={"session_id": session_id},
         include=["documents"]
@@ -80,18 +85,19 @@ def generate_flashcards(session_id: str):
         print(f"⚠️ No documents found for session {session_id}")
         return []
 
-    # Combine docs (capped to avoid context limit)
-    full_context = "\n\n".join(docs[:15])
+    # Combine docs (Increase limit to cover more material)
+    full_context = "\n\n".join(docs[:40]) 
 
     # 3. Generate with AI
-    prompt = f"Extract topics and generate revision flashcards from this text:\n\n{full_context}"
+    lang_instruction = f"Output language: {language}. Remember: technical terms in English, explanations in {language}."
+    prompt = f"Extract topics and generate revision flashcards from this text:\n\n{full_context}\n\n{lang_instruction}"
     
     messages = [
         SystemMessage(content=FLASHCARD_SYSTEM_PROMPT),
         HumanMessage(content=prompt)
     ]
 
-    print(f"🪄 Generating flashcards via AI for session {session_id}...")
+    print(f"🪄 Generating {language} flashcards via AI for session {session_id}...")
     response = generate_ai_response(messages)
     
     try:
@@ -106,7 +112,7 @@ def generate_flashcards(session_id: str):
             
         return data.get("flashcards", [])
     except Exception as e:
-        print(f"❌ Failed to parse flashcard JSON: {e}")
+        print(f"❌ Failed to parse {language} flashcard JSON: {e}")
         print(f"RAW CONTENT: {response.content}")
         return []
 

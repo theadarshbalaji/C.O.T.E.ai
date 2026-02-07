@@ -10,18 +10,20 @@ interface Flashcard {
 
 interface FlashcardsViewProps {
     sessionId: string;
+    language: string;
     onBack: () => void;
 }
 
-export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ sessionId, onBack }) => {
+export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ sessionId, language, onBack }) => {
     const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [direction, setDirection] = useState(0);
 
     useEffect(() => {
         const fetchFlashcards = async () => {
             try {
-                const res = await fetch(`http://localhost:8000/api/flashcards/${sessionId}`);
+                const res = await fetch(`http://localhost:8000/api/flashcards/${sessionId}?language=${language}`);
                 const data = await res.json();
                 setFlashcards(data);
             } catch (err) {
@@ -37,6 +39,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ sessionId, onBac
 
     const handleNext = async () => {
         if (currentIndex < flashcards.length - 1) {
+            setDirection(1);
             // Award 20 XP
             try {
                 await fetch('http://localhost:8000/api/add_xp', {
@@ -53,6 +56,13 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ sessionId, onBac
             }
 
             setCurrentIndex(prev => prev + 1);
+        }
+    };
+
+    const handlePrevious = () => {
+        if (currentIndex > 0) {
+            setDirection(-1);
+            setCurrentIndex(prev => prev - 1);
         }
     };
 
@@ -97,12 +107,13 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ sessionId, onBac
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center">
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
                         key={currentIndex}
-                        initial={{ opacity: 0, x: 50 }}
+                        custom={direction}
+                        initial={{ opacity: 0, x: direction > 0 ? 50 : -50 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -50 }}
+                        exit={{ opacity: 0, x: direction > 0 ? -50 : 50 }}
                         transition={{ type: "spring", damping: 20, stiffness: 100 }}
                         className="w-full max-w-2xl bg-card border-2 border-primary/20 rounded-[2.5rem] p-12 shadow-2xl relative overflow-hidden group hover:border-primary/40 transition-colors"
                     >
@@ -137,23 +148,32 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({ sessionId, onBac
                         ))}
                     </div>
 
-                    {currentIndex < flashcards.length - 1 && (
-                        <button
-                            onClick={handleNext}
-                            className="bg-primary text-primary-foreground px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 group"
-                        >
-                            Next Topic <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                        </button>
-                    )}
+                    <div className="flex items-center gap-4">
+                        {currentIndex > 0 && (
+                            <button
+                                onClick={handlePrevious}
+                                className="bg-secondary text-secondary-foreground px-8 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-muted transition-all border border-border hover:border-primary/50 group"
+                            >
+                                <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> Previous
+                            </button>
+                        )}
 
-                    {currentIndex === flashcards.length - 1 && (
-                        <button
-                            onClick={onBack}
-                            className="bg-green-600 text-white px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-green-700 transition-all shadow-xl shadow-green-500/20 hover:scale-105 active:scale-95"
-                        >
-                            Finish Revision <Trophy size={20} />
-                        </button>
-                    )}
+                        {currentIndex < flashcards.length - 1 ? (
+                            <button
+                                onClick={handleNext}
+                                className="bg-primary text-primary-foreground px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 group"
+                            >
+                                Next Topic <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        ) : (
+                            <button
+                                onClick={onBack}
+                                className="bg-green-600 text-white px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-green-700 transition-all shadow-xl shadow-green-500/20 hover:scale-105 active:scale-95"
+                            >
+                                Finish Revision <Trophy size={20} />
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

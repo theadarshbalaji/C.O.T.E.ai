@@ -166,13 +166,13 @@ export default function App() {
                     }}
                 />
 
-                <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}`}>
+                <div className={`flex-1 h-screen flex flex-col transition-all duration-300 ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}`}>
                     <Navbar
                         onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
                         title={navbarTitle}
                     />
 
-                    <main className={`${selectedTopic ? 'h-[calc(100vh-64px)] overflow-hidden flex flex-col' : 'min-h-[calc(100vh-64px)]'}`}>
+                    <main className={`flex-1 overflow-y-auto ${selectedTopic ? 'h-full overflow-hidden flex flex-col' : ''}`}>
                         {selectedTopic ? (
                             <MaterialsHub
                                 topic={selectedTopic}

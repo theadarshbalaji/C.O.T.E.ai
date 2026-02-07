@@ -12,6 +12,8 @@ interface MaterialsHubProps {
 
 export const MaterialsHub: React.FC<MaterialsHubProps> = ({ topic, onBack, userRole, onUploadComplete }) => {
     const [view, setView] = useState<'hub' | 'material' | 'flashcards'>('hub');
+    const [selectingLanguage, setSelectingLanguage] = useState(false);
+    const [selectedLanguage, setSelectedLanguage] = useState('english');
 
     if (userRole === 'teacher') {
         return (
@@ -39,10 +41,17 @@ export const MaterialsHub: React.FC<MaterialsHubProps> = ({ topic, onBack, userR
         return (
             <FlashcardsView
                 sessionId={topic.id}
+                language={selectedLanguage}
                 onBack={() => setView('hub')}
             />
         );
     }
+
+    const languages = [
+        { id: 'english', label: 'English', desc: 'Full English summaries' },
+        { id: 'hindi', label: 'Hindi', desc: 'हिन्दी script + English terms' },
+        { id: 'telugu', label: 'Telugu', desc: 'తెలుగు script + English terms' }
+    ];
 
     return (
         <div className="h-full flex flex-col bg-background animate-in fade-in duration-700">
@@ -107,7 +116,7 @@ export const MaterialsHub: React.FC<MaterialsHubProps> = ({ topic, onBack, userR
 
                     {/* AI Flashcards Button */}
                     <button
-                        onClick={() => setView('flashcards')}
+                        onClick={() => setSelectingLanguage(true)}
                         className="group relative p-10 bg-card border-2 border-border rounded-[2.5rem] hover:border-purple-500 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/5 flex flex-col items-center text-center space-y-6 overflow-hidden"
                     >
                         <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-bl-[5rem] -mr-8 -mt-8 transition-all group-hover:scale-110" />
@@ -129,6 +138,42 @@ export const MaterialsHub: React.FC<MaterialsHubProps> = ({ topic, onBack, userR
                     </button>
                 </div>
             </div>
+
+            {/* Language Selection Overlay */}
+            {selectingLanguage && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-background/80 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="w-full max-w-2xl bg-card border-2 border-primary/20 rounded-[2.5rem] p-10 shadow-2xl space-y-8">
+                        <div className="text-center space-y-2">
+                            <h3 className="text-3xl font-black tracking-tight">Select Revision Language</h3>
+                            <p className="text-muted-foreground font-medium">Explanations will be in your chosen language, technical terms stay in English.</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {languages.map((lang) => (
+                                <button
+                                    key={lang.id}
+                                    onClick={() => {
+                                        setSelectedLanguage(lang.id);
+                                        setView('flashcards');
+                                        setSelectingLanguage(false);
+                                    }}
+                                    className="p-6 bg-secondary/50 border-2 border-transparent hover:border-primary rounded-3xl transition-all text-center space-y-2 group"
+                                >
+                                    <p className="text-xl font-bold group-hover:text-primary">{lang.label}</p>
+                                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter">{lang.desc}</p>
+                                </button>
+                            ))}
+                        </div>
+
+                        <button
+                            onClick={() => setSelectingLanguage(false)}
+                            className="w-full py-4 text-muted-foreground font-bold hover:text-foreground transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Bottom Info Banner */}
             <div className="p-6 text-center text-muted-foreground/60">
