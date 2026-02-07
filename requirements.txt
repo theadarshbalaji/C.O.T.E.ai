@@ -11,3 +11,4 @@ tenacity
 google-generativeai
 pypdf
 streamlit
+unstructured[pdf]
