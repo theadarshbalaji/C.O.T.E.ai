@@ -15,7 +15,17 @@ C.O.T.E.ai bridges the gap between traditional teaching and personal AI tutoring
 ### 🎓 Student Portal
 - **Live Document Summaries**: Instant access to key takeaways from uploaded materials.
 - **Summarized Flashcards**: Personalized cards generated for "last-second revision" and efficient active recall.
-- **Dynamic Adaptive Tests**: Quizzes that evolve to increase the student's level to their maximum potential.
+- **Gamified Assessment System**: 
+  - Three progressive difficulty levels (Recall, Apply, Create) with XP-based rewards
+  - Real-time feedback with instant XP notifications (+10 XP for correct answers)
+  - Automated transitions between questions for seamless testing experience
+  - Detailed post-assessment analytics showing correct answers, mistakes, and total XP earned
+- **Mistakes Repository**: 
+  - Comprehensive tracking of all incorrect answers across assessments
+  - AI-generated explanations for each mistake
+  - Personal comment/note system for self-reflection and learning
+  - Global mistakes view aggregating errors from all classroom sessions
+- **Live Progress Dashboard**: Track your XP growth, weekly improvement metrics, and review recent mistakes
 - **C.O.T.E.ai Doubt Assistant**: A premium, glassmorphism-styled floating chatbot for instant doubt clarification using RAG.
 
 ## 🏗️ Project Structure
